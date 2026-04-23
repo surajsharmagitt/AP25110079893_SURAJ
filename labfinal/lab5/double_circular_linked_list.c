@@ -1,165 +1,301 @@
-// CIRCULAR DOUBLY LINKED LIST
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-int getInt(const char *msg, int *num)
-{
-    char input[100];
-    printf("%s", msg);
-    if (!fgets(input, sizeof(input), stdin))
-        return 0;
-    if (sscanf(input, "%d", num) != 1)
-        return 0;
-    return 1;
-}
-struct Node
+
+struct node
 {
     int data;
-    struct Node *prev, *next;
+    struct node *prev;
+    struct node *next;
 };
-struct Node *head = NULL;
-struct Node *createNode(int val)
-{
-    struct Node *n = malloc(sizeof(struct Node));
-    n->data = val;
-    n->prev = n->next = NULL;
-    return n;
-}
-int length()
-{
-    if (!head)
-        return 0;
-    int c = 1;
-    struct Node *t = head->next;
-    while (t != head)
-    {
-        c++;
-        t = t->next;
-    }
-    return c;
-}
-void insert(int val, int pos)
-{
-    struct Node *n = createNode(val);
-    if (!head)
-    {
-        head = n;
-        n->next = n->prev = n;
-        return;
-    }
-    if (pos <= 1)
-    {
-        struct Node *last = head->prev;
-        n->next = head;
-        n->prev = last;
-        last->next = n;
-        head->prev = n;
-        head = n;
-        return;
-    }
-    struct Node *t = head;
-    for (int i = 1; t->next != head && i < pos - 1; i++)
-        t = t->next;
 
-    n->next = t->next;
-    n->prev = t;
-    t->next->prev = n;
-    t->next = n;
-}
-void deleteNode(int pos)
+struct node *head = NULL;
+
+// Insert at beginning
+void insert_begin(int x)
 {
-    if (!head)
+    struct node *newnode, *last;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    if(head == NULL)
     {
-        printf("Empty\n");
+        newnode->next = newnode;
+        newnode->prev = newnode;
+        head = newnode;
         return;
     }
 
-    if (pos <= 1)
-    {
-        if (head->next == head)
-        {
-            free(head);
-            head = NULL;
-            return;
-        }
-        struct Node *last = head->prev;
-        struct Node *temp = head;
-        head = head->next;
-        last->next = head;
-        head->prev = last;
-        free(temp);
-        return;
-    }
-    struct Node *t = head;
-    for (int i = 1; t->next != head && i < pos; i++)
-        t = t->next;
+    last = head->prev;
 
-    t->prev->next = t->next;
-    t->next->prev = t->prev;
-    free(t);
+    newnode->next = head;
+    newnode->prev = last;
+
+    last->next = newnode;
+    head->prev = newnode;
+
+    head = newnode;
 }
-void display()
+
+// Insert at end
+void insert_end(int x)
 {
-    if (!head)
+    struct node *newnode, *last;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    if(head == NULL)
     {
-        printf("Empty\n");
+        newnode->next = newnode;
+        newnode->prev = newnode;
+        head = newnode;
         return;
     }
-    struct Node *t = head;
+
+    last = head->prev;
+
+    newnode->next = head;
+    newnode->prev = last;
+
+    last->next = newnode;
+    head->prev = newnode;
+}
+
+// Delete from beginning
+void delete_begin()
+{
+    struct node *last, *temp;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(head->next == head)
+    {
+        free(head);
+        head = NULL;
+        return;
+    }
+
+    last = head->prev;
+    temp = head;
+
+    head = head->next;
+
+    last->next = head;
+    head->prev = last;
+
+    free(temp);
+}
+
+// Delete from end
+void delete_end()
+{
+    struct node *last;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(head->next == head)
+    {
+        free(head);
+        head = NULL;
+        return;
+    }
+
+    last = head->prev;
+
+    last->prev->next = head;
+    head->prev = last->prev;
+
+    free(last);
+}
+
+// Insert at position
+void insert_pos(int x, int pos)
+{
+    struct node *newnode, *temp;
+    int i = 1;
+
+    if(pos == 1)
+    {
+        insert_begin(x);
+        return;
+    }
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    temp = head;
+
+    while(i < pos - 1 && temp->next != head)
+    {
+        temp = temp->next;
+        i++;
+    }
+
+    if(temp->next == head && i < pos - 1)
+    {
+        printf("Invalid Position\n");
+        return;
+    }
+
+    newnode->next = temp->next;
+    newnode->prev = temp;
+
+    temp->next->prev = newnode;
+    temp->next = newnode;
+}
+
+// Delete at position
+void delete_pos(int pos)
+{
+    struct node *temp;
+    int i = 1;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(pos == 1)
+    {
+        delete_begin();
+        return;
+    }
+
+    temp = head;
+
+    while(i < pos && temp->next != head)
+    {
+        temp = temp->next;
+        i++;
+    }
+
+    if(temp->next == head && i < pos)
+    {
+        printf("Invalid Position\n");
+        return;
+    }
+
+    temp->prev->next = temp->next;
+    temp->next->prev = temp->prev;
+
+    free(temp);
+}
+
+// Search
+void search(int key)
+{
+    struct node *temp = head;
+    int pos = 1;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
     do
     {
-        printf("%d <-> ", t->data);
-        t = t->next;
-    } while (t != head);
-    printf("(circular)\n");
+        if(temp->data == key)
+        {
+            printf("Element found at position %d\n", pos);
+            return;
+        }
+        temp = temp->next;
+        pos++;
+    } while(temp != head);
+
+    printf("Element not found\n");
 }
+
+// Display
+void display()
+{
+    struct node *temp = head;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    do
+    {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    } while(temp != head);
+
+    printf("\n");
+}
+
+// Main
 int main()
 {
-    int ch, val, pos;
-    while (1)
+    int choice, value, pos;
+
+    do
     {
-        printf("\n1.Insert Begin\n2.Insert End\n3.Insert Pos\n");
-        printf("4.Delete Begin\n5.Delete End\n6.Delete Pos\n");
-        printf("7.Display\n8.Exit\n");
+        printf("\n1.Insert Begin\n2.Insert End\n3.Delete Begin\n4.Delete End\n");
+        printf("5.Insert Position\n6.Delete Position\n7.Search\n8.Display\n9.Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
 
-        if (!getInt("Choice: ", &ch))
+        switch(choice)
         {
-            printf("Invalid\n");
-            continue;
+            case 1:
+                scanf("%d", &value);
+                insert_begin(value);
+                break;
+
+            case 2:
+                scanf("%d", &value);
+                insert_end(value);
+                break;
+
+            case 3:
+                delete_begin();
+                break;
+
+            case 4:
+                delete_end();
+                break;
+
+            case 5:
+                scanf("%d %d", &value, &pos);
+                insert_pos(value, pos);
+                break;
+
+            case 6:
+                scanf("%d", &pos);
+                delete_pos(pos);
+                break;
+
+            case 7:
+                scanf("%d", &value);
+                search(value);
+                break;
+
+            case 8:
+                display();
+                break;
+
+            case 9:
+                break;
+
+            default:
+                printf("Invalid choice\n");
         }
 
-        switch (ch)
-        {
-        case 1:
-            if (getInt("Value: ", &val))
-                insert(val, 1);
-            break;
-        case 2:
-            if (getInt("Value: ", &val))
-                insert(val, length() + 1);
-            break;
-        case 3:
-            if (getInt("Value: ", &val) && getInt("Position: ", &pos))
-                insert(val, pos);
-            break;
-        case 4:
-            deleteNode(1);
-            break;
-        case 5:
-            deleteNode(length());
-            break;
-        case 6:
-            if (getInt("Position: ", &pos))
-                deleteNode(pos);
-            break;
-        case 7:
-            display();
-            break;
-        case 8:
-            exit(0);
-        default:
-            printf("Invalid\n");
-        }
-    }
+    } while(choice != 9);
+
+    return 0;
 }
