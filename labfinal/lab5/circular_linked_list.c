@@ -1,163 +1,292 @@
-//CIRCULAR SINGLY LINKED LIST
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-int getInt(const char *msg, int *num)
-{
-    char input[100];
-    printf("%s", msg);
-    if (!fgets(input, sizeof(input), stdin))
-        return 0;
-    if (sscanf(input, "%d", num) != 1)
-        return 0;
-    return 1;
-}
-struct Node
+
+struct node
 {
     int data;
-    struct Node *next;
+    struct node *next;
 };
-struct Node *head = NULL;
-struct Node *createNode(int val)
-{
-    struct Node *n = malloc(sizeof(struct Node));
-    n->data = val;
-    n->next = NULL;
-    return n;
-}
-int length()
-{
-    if (!head)
-        return 0;
-    int c = 1;
-    struct Node *t = head->next;
-    while (t != head)
-    {
-        c++;
-        t = t->next;
-    }
-    return c;
-}
-void insert(int val, int pos)
-{
-    struct Node *n = createNode(val);
-    if (!head)
-    {
-        head = n;
-        n->next = head;
-        return;
-    }
-    if (pos <= 1)
-    {
-        struct Node *t = head;
-        while (t->next != head)
-            t = t->next;
-        n->next = head;
-        t->next = n;
-        head = n;
-        return;
-    }
-    struct Node *t = head;
-    for (int i = 1; t->next != head && i < pos - 1; i++)
-        t = t->next;
 
-    n->next = t->next;
-    t->next = n;
-}
-void deleteNode(int pos)
+struct node *head = NULL;
+
+// Insert at beginning
+void insert_begin(int x)
 {
-    if (!head)
+    struct node *newnode, *temp;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    if(head == NULL)
     {
-        printf("List empty\n");
+        head = newnode;
+        newnode->next = head;
         return;
     }
-    if (pos <= 1)
-    {
-        if (head->next == head)
-        {
-            free(head);
-            head = NULL;
-            return;
-        }
-        struct Node *t = head;
-        while (t->next != head)
-            t = t->next;
-        struct Node *temp = head;
-        head = head->next;
-        t->next = head;
-        free(temp);
-        return;
-    }
-    struct Node *t = head, *prev = NULL;
-    for (int i = 1; t->next != head && i < pos; i++)
-    {
-        prev = t;
-        t = t->next;
-    }
-    prev->next = t->next;
-    free(t);
+
+    temp = head;
+    while(temp->next != head)
+        temp = temp->next;
+
+    newnode->next = head;
+    temp->next = newnode;
+    head = newnode;
 }
-void display()
+
+// Insert at end
+void insert_end(int x)
 {
-    if (!head)
+    struct node *newnode, *temp;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    if(head == NULL)
     {
-        printf("List empty\n");
+        head = newnode;
+        newnode->next = head;
         return;
     }
-    struct Node *t = head;
+
+    temp = head;
+    while(temp->next != head)
+        temp = temp->next;
+
+    temp->next = newnode;
+    newnode->next = head;
+}
+
+// Delete from beginning
+void delete_begin()
+{
+    struct node *temp, *last;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(head->next == head)
+    {
+        free(head);
+        head = NULL;
+        return;
+    }
+
+    last = head;
+    while(last->next != head)
+        last = last->next;
+
+    temp = head;
+    head = head->next;
+    last->next = head;
+
+    free(temp);
+}
+
+// Delete from end
+void delete_end()
+{
+    struct node *temp, *prev;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(head->next == head)
+    {
+        free(head);
+        head = NULL;
+        return;
+    }
+
+    temp = head;
+    while(temp->next != head)
+    {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    prev->next = head;
+    free(temp);
+}
+
+// Insert at position
+void insert_pos(int x, int pos)
+{
+    struct node *newnode, *temp;
+    int i = 1;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+    newnode->data = x;
+
+    if(pos == 1)
+    {
+        insert_begin(x);
+        return;
+    }
+
+    temp = head;
+    while(i < pos - 1 && temp->next != head)
+    {
+        temp = temp->next;
+        i++;
+    }
+
+    if(temp->next == head && i < pos - 1)
+    {
+        printf("Invalid Position\n");
+        return;
+    }
+
+    newnode->next = temp->next;
+    temp->next = newnode;
+}
+
+// Delete at position
+void delete_pos(int pos)
+{
+    struct node *temp, *prev;
+    int i = 1;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    if(pos == 1)
+    {
+        delete_begin();
+        return;
+    }
+
+    temp = head;
+    while(i < pos && temp->next != head)
+    {
+        prev = temp;
+        temp = temp->next;
+        i++;
+    }
+
+    if(temp->next == head && i < pos)
+    {
+        printf("Invalid Position\n");
+        return;
+    }
+
+    prev->next = temp->next;
+    free(temp);
+}
+
+// Search
+void search(int key)
+{
+    struct node *temp = head;
+    int pos = 1;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
     do
     {
-        printf("%d -> ", t->data);
-        t = t->next;
-    } while (t != head);
-    printf("(back to head)\n");
+        if(temp->data == key)
+        {
+            printf("Element found at position %d\n", pos);
+            return;
+        }
+        temp = temp->next;
+        pos++;
+    } while(temp != head);
+
+    printf("Element not found\n");
 }
+
+// Display
+void display()
+{
+    struct node *temp = head;
+
+    if(head == NULL)
+    {
+        printf("List is Empty\n");
+        return;
+    }
+
+    do
+    {
+        printf("%d ", temp->data);
+        temp = temp->next;
+    } while(temp != head);
+
+    printf("\n");
+}
+
+// Main
 int main()
 {
-    int ch, val, pos;
-    while (1)
+    int choice, value, pos;
+
+    do
     {
-        printf("\n1.Insert Begin\n2.Insert End\n3.Insert Pos\n");
-        printf("4.Delete Begin\n5.Delete End\n6.Delete Pos\n");
-        printf("7.Display\n8.Exit\n");
+        printf("\n1.Insert Begin\n2.Insert End\n3.Delete Begin\n4.Delete End\n");
+        printf("5.Insert Position\n6.Delete Position\n7.Search\n8.Display\n9.Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
 
-        if (!getInt("Choice: ", &ch))
+        switch(choice)
         {
-            printf("Invalid\n");
-            continue;
+            case 1:
+                scanf("%d", &value);
+                insert_begin(value);
+                break;
+
+            case 2:
+                scanf("%d", &value);
+                insert_end(value);
+                break;
+
+            case 3:
+                delete_begin();
+                break;
+
+            case 4:
+                delete_end();
+                break;
+
+            case 5:
+                scanf("%d %d", &value, &pos);
+                insert_pos(value, pos);
+                break;
+
+            case 6:
+                scanf("%d", &pos);
+                delete_pos(pos);
+                break;
+
+            case 7:
+                scanf("%d", &value);
+                search(value);
+                break;
+
+            case 8:
+                display();
+                break;
+
+            case 9:
+                break;
+
+            default:
+                printf("Invalid choice\n");
         }
 
-        switch (ch)
-        {
-        case 1:
-            if (getInt("Value: ", &val))
-                insert(val, 1);
-            break;
-        case 2:
-            if (getInt("Value: ", &val))
-                insert(val, length() + 1);
-            break;
-        case 3:
-            if (getInt("Value: ", &val) && getInt("Position: ", &pos))
-                insert(val, pos);
-            break;
-        case 4:
-            deleteNode(1);
-            break;
-        case 5:
-            deleteNode(length());
-            break;
-        case 6:
-            if (getInt("Position: ", &pos))
-                deleteNode(pos);
-            break;
-        case 7:
-            display();
-            break;
-        case 8:
-            exit(0);
-        default:
-            printf("Invalid choice\n");
-        }
-    }
+    } while(choice != 9);
+
+    return 0;
 }
