@@ -1,92 +1,121 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node
+struct node
 {
     int data;
-    struct Node *next;
+    struct node *next;
 };
 
-struct Node *front = NULL, *rear = NULL;
+struct node *front = NULL;
+struct node *rear = NULL;
 
-void enqueue(int val)
+void clearBuffer()
 {
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    newNode->data = val;
-    newNode->next = NULL;
-    if (rear == NULL)
-    {
-        front = rear = newNode;
-        return;
-    }
-    rear->next = newNode;
-    rear = newNode;
-    printf("%d enqueued to queue\n", val);
+    while(getchar() != '\n');
 }
 
-int dequeue()
+void enqueue()
 {
-    if (front == NULL)
+    int x;
+    struct node *newnode;
+
+    newnode = (struct node*)malloc(sizeof(struct node));
+
+    if(newnode == NULL)
+    {
+        printf("Memory not available\n");
+        return;
+    }
+
+    printf("Enter value: ");
+    if(scanf("%d", &x) != 1)
+    {
+        printf("Invalid input\n");
+        clearBuffer();
+        free(newnode);
+        return;
+    }
+
+    newnode->data = x;
+    newnode->next = NULL;
+
+    if(front == NULL)
+        front = rear = newnode;
+    else
+    {
+        rear->next = newnode;
+        rear = newnode;
+    }
+}
+
+void dequeue()
+{
+    struct node *temp;
+
+    if(front == NULL)
     {
         printf("Queue Underflow\n");
-        return -1;
+        return;
     }
-    struct Node *temp = front;
+
+    temp = front;
+    printf("Deleted element is %d\n", temp->data);
     front = front->next;
 
-    if (front == NULL)
-    {
+    if(front == NULL)
         rear = NULL;
-    }
 
-    int val = temp->data;
     free(temp);
-    return val;
 }
 
 void display()
 {
-    if (front == NULL)
+    struct node *temp;
+
+    if(front == NULL)
     {
-        printf("Queue is empty\n");
+        printf("Queue is Empty\n");
         return;
     }
-    struct Node *temp = front;
-    while (temp != NULL)
+
+    temp = front;
+
+    while(temp != NULL)
     {
         printf("%d ", temp->data);
         temp = temp->next;
     }
+
     printf("\n");
 }
 
 int main()
 {
-    int choice, val;
-    while (1)
+    int choice;
+
+    do
     {
-        printf("\n1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\nChoose an option: ");
-        scanf("%d", &choice);
-        switch (choice)
+        printf("\n1.Enqueue\n2.Dequeue\n3.Display\n4.Exit\n");
+        printf("Enter choice: ");
+
+        if(scanf("%d", &choice) != 1)
         {
-        case 1:
-            printf("Enter value to enqueue: ");
-            scanf("%d", &val);
-            enqueue(val);
-            break;
-        case 2:
-            val = dequeue();
-            if (val != -1)
-                printf("Dequeued %d\n", val);
-            break;
-        case 3:
-            display();
-            break;
-        case 4:
-            exit(0);
-        default:
-            printf("Invalid choice\n");
+            printf("Invalid input\n");
+            clearBuffer();
+            continue;
         }
-    }
+
+        switch(choice)
+        {
+            case 1: enqueue(); break;
+            case 2: dequeue(); break;
+            case 3: display(); break;
+            case 4: break;
+            default: printf("Invalid choice\n");
+        }
+
+    } while(choice != 4);
+
     return 0;
 }
